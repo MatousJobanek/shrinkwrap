@@ -167,10 +167,18 @@ public class URLPackageScanner {
 
     private List<URL> loadResources(String name) throws IOException {
         ArrayList<URL> resources = Collections.list(classLoader.getResources(prefix + name));
-
         if (resources.size() == 0) {
             prefix = WEB_INF_CLASSES_DIR;
             resources = Collections.list(classLoader.getResources(prefix + name));
+            if (resources.size() == 0 && URLClassLoader.class.isAssignableFrom(classLoader.getClass())) {
+                prefix = "";
+                for (URL url : ((URLClassLoader) classLoader).getURLs()){
+                    if (url.toString().contains(name)) {
+                        resources.add(url);
+                    }
+                }
+
+            }
         } else {
             for (URL url : resources) {
                 if (url.toString().contains(WEB_INF_CLASSES_DIR)) {
